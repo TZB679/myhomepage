@@ -3,770 +3,762 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>TZB679の个人主页</title>
+    <title>TZB679の个人主页 | （新ui测试版）</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 移除移动端点击灰层 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #f0f4f8;
             overflow-x: hidden;
-            width: 100%;
-        }
-
-        /* 整体容器 */
-        .container {
-            width: 100%;
-            min-height: 100vh;
-            background-color: #f0f4f8;
-            overflow-x: hidden;
-        }
-
-        /* ========= 顶部导航栏 - 移动端适配 ========= */
-        .header-nav {
-            width: 100%;
-            height: 56px;
-            background-color: rgba(255,255,255,0.96);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 999;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            /* 防止溢出 */
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: nowrap;
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: #e0e7ff;
-            background-image: url("https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/small.png");
-            background-size: cover;
-            background-position: center;
-            flex-shrink: 0;
-            border: 1px solid rgba(64,158,255,0.2);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 24px;
-            flex-wrap: nowrap;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #2c3e4e;
-            font-size: 15px;
-            font-weight: 500;
-            transition: color 0.2s;
-            white-space: nowrap;
-            letter-spacing: 0.3px;
-        }
-
-        .nav-links a:hover {
-            color: #409eff;
-        }
-
-        /* 移动端缩小间距，防止挤爆 */
-        @media (max-width: 480px) {
-            .nav-left {
-                gap: 12px;
-            }
-            .nav-links {
-                gap: 18px;
-            }
-            .nav-links a {
-                font-size: 13px;
-            }
-            .header-nav {
-                padding: 0 12px;
-            }
-        }
-
-        /* ========= Banner轮播区域 (全屏但内容适配高度) ========= */
-        .banner-section {
-            width: 100%;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-            margin-top: 56px;
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #0a0c15;
         }
 
-        .banner-slider {
-            width: 100%;
-            height: 100%;
-            position: relative;
+        /* ========= 滚动容器 + 高性能滚动吸附 ========= */
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            /* 提升滚动性能 */
+            will-change: scroll-position;
         }
 
-        .banner-slide {
+        /* 每个区块占满一屏，滚动吸附 */
+        .section {
+            scroll-snap-align: start;
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* 硬件加速 */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* 区块内容容器 - 优化动画性能，使用transform而非margin/padding */
+        .section-content {
+            width: 90%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+            z-index: 2;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px) translateZ(0);
+            transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            will-change: transform, opacity;
+        }
+
+        /* 入场动画触发类 */
+        .section.in-view .section-content {
+            opacity: 1;
+            transform: translateY(0) translateZ(0);
+        }
+
+        /* 延迟动画辅助 */
+        .delay-1 { transition-delay: 0.08s; }
+        .delay-2 { transition-delay: 0.16s; }
+        .delay-3 { transition-delay: 0.26s; }
+
+        /* ========= 背景图统一样式（半透明叠加，提升文字可读性） ========= */
+        .section-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            transition: opacity 0.9s ease-in-out;
-            background-color: #131725; /* 优雅暗色底 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 0;
+            transform: translateZ(0);
         }
-
-        /* 背景图半透明拟态 */
-        .banner-slide::before {
+        .section-bg::after {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-size: cover;
-            background-position: center 30%;
-            background-repeat: no-repeat;
-            opacity: 0.45;
-            transition: opacity 0.9s ease;
-            z-index: 0;
-        }
-
-        /* 移动端背景图稍微调高一点位置优化 */
-        @media (max-width: 768px) {
-            .banner-slide::before {
-                background-position: center 40%;
-            }
-        }
-
-        /* 五张轮播图资源 */
-        .banner-slide:nth-child(1)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg'); }
-        .banner-slide:nth-child(2)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png'); }
-        .banner-slide:nth-child(3)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg'); }
-        .banner-slide:nth-child(4)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg'); }
-        .banner-slide:nth-child(5)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg'); }
-
-        .banner-slide.active {
-            opacity: 1;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(3px);
             z-index: 1;
         }
 
-        /* 文字内容弹性盒，确保垂直居中且不溢出 */
-        .banner-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            width: 90%;
-            max-width: 600px;
-            padding: 0 16px;
-            z-index: 2;
-            backdrop-filter: blur(2px);
-            border-radius: 24px;
-        }
-
-        .banner-title {
-            font-size: clamp(1.6rem, 7vw, 2.8rem);
-            font-weight: 700;
-            margin-bottom: 12px;
-            letter-spacing: -0.3px;
-            word-break: break-word;
-        }
-
-        .banner-subtitle {
-            font-size: clamp(0.9rem, 4vw, 1.25rem);
-            margin-bottom: 28px;
-            opacity: 0.95;
-            font-weight: 500;
-            word-break: break-word;
-        }
-
-        /* 标签容器-移动端紧凑且支持换行 */
-        .tag-container {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 16px;
-            padding: 0 8px;
-        }
-
-        .tag {
-            padding: 6px 18px;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(6px);
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 500;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(255,255,255,0.35);
-            white-space: nowrap;
-        }
-
-        @media (max-width: 480px) {
-            .tag {
-                padding: 5px 14px;
-                font-size: 12px;
-            }
-            .tag-container {
-                gap: 8px;
-            }
-        }
-
-        .tag:hover {
-            background-color: #409eff;
-            border-color: transparent;
-            transform: scale(1.02);
-        }
-
-        /* ========= 底部卡片 - 移动端响应式网格 ========= */
-        .card-container {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 14px;
-            width: 92%;
-            max-width: 1300px;
-            z-index: 20;
-            flex-wrap: wrap;
-            justify-content: center;
-            pointer-events: none; /* 父级不干扰，子级可点 */
-        }
-
-        .card {
-            flex: 1 1 180px;
-            min-width: 140px;
-            background-color: rgba(10, 15, 27, 0.82);
+        /* ========= 导航栏（固定顶部，保持原样） ========= */
+        .header-nav {
+            width: 100%;
+            height: 60px;
+            background-color: rgba(255,255,255,0.94);
             backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 14px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            pointer-events: auto;
-            /* 防止溢出 */
-            word-break: break-word;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
         }
-
-        @media (max-width: 640px) {
-            .card-container {
-                gap: 12px;
-                bottom: 20px;
-                width: 95%;
-            }
-            .card {
-                flex: 1 1 160px;
-                padding: 12px 10px;
-                gap: 8px;
-            }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: nowrap;
         }
-
-        @media (max-width: 520px) {
-            .card-container {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            .card {
-                flex: 1 1 42%; /* 两列布局 */
-                min-width: 130px;
-                padding: 10px 8px;
-            }
-            .card-icon {
-                width: 34px;
-                height: 34px;
-                font-size: 18px;
-            }
-            .card-title {
-                font-size: 14px;
-            }
-            .card-desc {
-                font-size: 11px;
-            }
-        }
-
-        @media (max-width: 420px) {
-            .card {
-                flex: 1 1 100%; /* 超小屏单列但美观 */
-                min-width: auto;
-            }
-            .card-container {
-                gap: 10px;
-                bottom: 18px;
-            }
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            background-color: rgba(0, 0, 0, 0.88);
-            border-color: rgba(64, 158, 255, 0.5);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        .card-icon {
+        .avatar {
             width: 42px;
             height: 42px;
-            border-radius: 60px;
+            border-radius: 50%;
+            background-image: url("https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/small.png");
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            border: 2px solid #409eff;
+        }
+        .nav-links {
             display: flex;
+            gap: 36px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #1f2d3d;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: #409eff;
+        }
+
+        @media (max-width: 680px) {
+            .header-nav { padding: 0 16px; height: 56px; }
+            .nav-left { gap: 16px; }
+            .nav-links { gap: 18px; }
+            .nav-links a { font-size: 13px; }
+            .avatar { width: 34px; height: 34px; }
+        }
+
+        /* ========= 右侧导航圆点（更丝滑指示） ========= */
+        .dot-nav {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .dot-item {
+            width: 10px;
+            height: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            padding: 0;
+        }
+        .dot-item.active {
+            width: 28px;
+            background-color: #409eff;
+            box-shadow: 0 0 8px #409eff;
+        }
+        @media (max-width: 768px) {
+            .dot-nav { right: 14px; gap: 10px; }
+            .dot-item { width: 8px; height: 8px; }
+            .dot-item.active { width: 22px; }
+        }
+
+        /* ========= 第一屏样式（欢迎屏+标签） ========= */
+        .section-1 .section-content {
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+        .main-title {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 18px;
+            letter-spacing: 2px;
+        }
+        .sub-punch {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .tag-group {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tag {
+            padding: 8px 26px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .tag:hover {
+            background: #409eff;
+            transform: scale(1.02);
+        }
+        @media (max-width: 550px) {
+            .tag { padding: 6px 18px; font-size: 13px; }
+            .tag-group { gap: 12px; }
+        }
+
+        /* ========= 第二屏：核心服务卡片区（软件/音源/工具） ========= */
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .core-card {
+            background: rgba(20, 25, 40, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 28px 22px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+        }
+        .core-card:hover {
+            transform: translateY(-6px);
+            background: rgba(30, 40, 60, 0.85);
+            border-color: #409eff;
+        }
+        .card-icon-big {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .core-card h3 {
+            color: white;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        .core-card p {
+            color: #ccc;
+            font-size: 14px;
+        }
+        .section-title {
+            font-size: clamp(1.6rem, 5vw, 2.4rem);
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 700px) {
+            .cards-grid { gap: 16px; }
+            .core-card { padding: 20px 16px; min-width: 150px; }
+            .card-icon-big { font-size: 38px; }
+            .core-card h3 { font-size: 1.3rem; }
+        }
+
+        /* ========= 第三屏：超大下载按钮（10首歌曲） ========= */
+        .download-section {
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
-            background-color: rgba(0,0,0,0.4);
-            flex-shrink: 0;
+            text-align: center;
         }
-
-        .card:nth-child(1) .card-icon { background-color: #ff7d00; box-shadow: 0 2px 6px rgba(255,125,0,0.3);}
-        .card:nth-child(2) .card-icon { background-color: #722ed1; }
-        .card:nth-child(3) .card-icon { background-color: #ff4d4f; }
-        .card:nth-child(4) .card-icon { background-color: #13c2c2; }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .card-desc {
-            font-size: 12px;
-            color: #e0e0e0;
-            opacity: 0.85;
-            line-height: 1.2;
-        }
-
-        /* 针对卡片文字换行优化 */
-        @media (max-width: 500px) {
-            .card-title {
-                font-size: 13px;
-            }
-            .card-desc {
-                font-size: 10px;
-            }
-        }
-
-        /* 修复内容区域避免被底部卡片遮挡严重 (移动端底部预留空间) */
-        .banner-section {
-            position: relative;
-        }
-
-        /* 为了让卡片不遮挡轮播文字太严重，适当增强文字底部留白（内容区自适应） */
-        .banner-content {
-            margin-bottom: 20px;
-        }
-
-        /* 微调卡片区域在极短屏下仍保证可视 */
-        @media (max-height: 700px) {
-            .card-container {
-                bottom: 12px;
-            }
-            .banner-content {
-                transform: translate(-50%, -55%);
-            }
-        }
-
-        /* 平滑滚动 & 基础排版 */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* 点击卡片涟漪效果（可选） */
-        .card:active {
-            transform: scale(0.98);
-            transition: transform 0.05s;
-        }
-
-        /* 轮播指示器增加圆点 (可选但优雅) 提升移动端交互提示 */
-        .indicators {
-            position: absolute;
-            bottom: 140px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            z-index: 15;
-            pointer-events: none;
-        }
-        @media (max-width: 640px) {
-            .indicators {
-                bottom: 130px;
-            }
-        }
-        @media (max-height: 700px) {
-            .indicators {
-                bottom: 120px;
-            }
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.5);
-            transition: all 0.2s;
-            pointer-events: auto;
+        .giant-download-btn {
+            background: linear-gradient(135deg, #ff6b35, #f5574c);
+            border: none;
+            border-radius: 80px;
+            padding: 24px 56px;
             cursor: pointer;
-            backdrop-filter: blur(2px);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            box-shadow: 0 20px 35px -10px rgba(245, 87, 76, 0.5);
+            margin-bottom: 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 18px;
+            backdrop-filter: blur(4px);
+        }
+        .giant-download-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 28px 40px -12px rgba(245, 87, 76, 0.7);
+        }
+        .giant-download-btn:active {
+            transform: scale(0.98);
+        }
+        .btn-icon {
+            font-size: 48px;
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.2));
+        }
+        .btn-text {
+            font-size: clamp(1.5rem, 6vw, 2.4rem);
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-sub {
+            font-size: 16px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .song-tip {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 12px 28px;
+            color: #ffd966;
+            font-size: 15px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        @media (max-width: 650px) {
+            .giant-download-btn { padding: 18px 32px; gap: 12px; }
+            .btn-icon { font-size: 36px; }
+            .btn-text { font-size: 1.3rem; }
+            .song-tip { font-size: 12px; padding: 8px 20px; }
         }
 
-        .dot.active-dot {
-            width: 24px;
-            background: #409eff;
-            box-shadow: 0 0 6px #409eff;
+        /* ========= 第四屏：购买音源 + 愿景 ========= */
+        .shop-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 40px 32px;
+            margin-top: 20px;
+        }
+        .shop-info {
+            text-align: center;
+            flex: 1;
+        }
+        .shop-info h2 {
+            font-size: 2rem;
+            color: #ffd966;
+            margin-bottom: 16px;
+        }
+        .shop-btn {
+            background: #ff7d00;
+            padding: 14px 34px;
+            border-radius: 50px;
+            display: inline-block;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+        }
+        .shop-btn:hover {
+            background: #e56c00;
+            transform: scale(1.02);
+        }
+        .vision-text {
+            flex: 1;
+            color: white;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            text-align: center;
+            border-left: 2px solid #409eff;
+            padding-left: 30px;
+        }
+        @media (max-width: 760px) {
+            .shop-row { flex-direction: column; padding: 30px 20px; gap: 28px; }
+            .vision-text { border-left: none; border-top: 2px solid #409eff; padding-top: 20px; padding-left: 0; }
         }
 
-        /* 防止卡片遮住指示器点击区域, 提升体验 */
-        .card-container {
-            pointer-events: auto;
+        /* ========= 第五屏：HI-FI工作室 & 结尾 ========= */
+        .hifi-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 48px 32px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .hifi-icon {
+            font-size: 72px;
+            margin-bottom: 24px;
+        }
+        .hifi-title {
+            font-size: 2.2rem;
+            color: #13c2c2;
+            margin-bottom: 16px;
+        }
+        .hifi-desc {
+            color: #ddd;
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+        }
+        .footer-note {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        /* 各区块单独背景图 (复用原有图片资源) */
+        .bg-1 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg'); }
+        .bg-2 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png'); }
+        .bg-3 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg'); }
+        .bg-4 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg'); }
+        .bg-5 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg'); }
+
+        .section-bg {
+            background-size: cover;
+            background-position: center 30%;
+        }
+
+        /* 全局toast轻提示 */
+        .global-toast {
+            transition: opacity 0.2s;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- 顶部导航栏 移动端自适应无溢出 -->
-    <div class="header-nav">
-        <div class="nav-left">
-            <div class="avatar"></div>
-            <div class="nav-links">
-                <a href="https://share.feijipan.com/s/wW4wUS7Q" target="_blank" rel="noopener noreferrer">软件下载</a>
-                <a href="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/" target="_blank" rel="noopener noreferrer">音源</a>
-                <a href="https://share.feijipan.com/s/E94vKi0G" target="_blank" rel="noopener noreferrer">工具下载</a>
-            </div>
+
+<nav class="header-nav">
+    <div class="nav-left">
+        <div class="avatar"></div>
+        <div class="nav-links">
+            <a href="https://share.feijipan.com/s/wW4wUS7Q" target="_blank">软件下载</a>
+            <a href="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/" target="_blank">音源</a>
+            <a href="https://share.feijipan.com/s/E94vKi0G" target="_blank">工具下载</a>
         </div>
     </div>
+</nav>
 
-    <!-- Banner轮播区域 优化背景缩放 -->
-    <div class="banner-section">
-        <div class="banner-slider">
-            <!-- 轮播图1 -->
-            <div class="banner-slide active">
-                <div class="banner-content">
-                    <h1 class="banner-title">HI〰️欢迎来到我的主页...</h1>
-                    <p class="banner-subtitle">没有看不到的，只有想不到的</p>
-                    <div class="tag-container">
-                        <div class="tag" data-link="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">LX Music</div>
-                        <div class="tag" data-link="https://share.feijipan.com/s/wW4wUS7Q">Sollin</div>
-                        <div class="tag" data-link="https://share.feijipan.com/s/E94vKi0G">HI-FI资源</div>
-                    </div>
-                </div>
+<div class="dot-nav" id="dotNav"></div>
+
+<div class="scroll-container" id="scrollContainer">
+    <!-- 第一屏 欢迎屏 + 原有标签 -->
+    <section class="section section-1" id="sec1">
+        <div class="section-bg bg-1"></div>
+        <div class="section-content">
+            <h1 class="main-title">HI〰️ 欢迎来到我的主页</h1>
+            <p class="sub-punch">没有看不到的，只有想不到的</p>
+            <div class="tag-group">
+                <div class="tag" data-url="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">LX Music</div>
+                <div class="tag" data-url="https://share.feijipan.com/s/wW4wUS7Q">Sollin</div>
+                <div class="tag" data-url="https://share.feijipan.com/s/E94vKi0G">HI-FI资源</div>
             </div>
-            <!-- 轮播图2 -->
-            <div class="banner-slide">
-                <div class="banner-content">
-                    <h1 class="banner-title">更多内容持续更新中</h1>
-                    <p class="banner-subtitle">一起学习，一起进步</p>
+        </div>
+    </section>
+
+    <!-- 第二屏 核心服务卡片（软件下载、音源下载、工具下载）整合展示 -->
+    <section class="section" id="sec2">
+        <div class="section-bg bg-2"></div>
+        <div class="section-content">
+            <h2 class="section-title">✨ 精选资源直达 ✨</h2>
+            <div class="cards-grid">
+                <div class="core-card" data-url="https://share.feijipan.com/s/wW4wUS7Q">
+                    <div class="card-icon-big">📦</div>
+                    <h3>软件下载</h3>
+                    <p>实用工具 / 绿色软件</p>
                 </div>
-            </div>
-            <!-- 轮播图3 -->
-            <div class="banner-slide">
-                <div class="banner-content">
-                    <h1 class="banner-title">探索无限可能</h1>
-                    <p class="banner-subtitle">创意与灵感的交汇点</p>
+                <div class="core-card" data-url="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">
+                    <div class="card-icon-big">🎶</div>
+                    <h3>音源下载</h3>
+                    <p>LX Music / 无损音源</p>
                 </div>
-            </div>
-            <!-- 轮播图4 -->
-            <div class="banner-slide">
-                <div class="banner-content">
-                    <h1 class="banner-title">享受纯粹的音乐时光</h1>
-                    <p class="banner-subtitle">每一首都是心动的声音</p>
-                </div>
-            </div>
-            <!-- 轮播图5 -->
-            <div class="banner-slide">
-                <div class="banner-content">
-                    <h1 class="banner-title">TZB陪你一起成长</h1>
-                    <p class="banner-subtitle">分享让快乐加倍</p>
+                <div class="core-card" data-url="https://share.feijipan.com/s/E94vKi0G">
+                    <div class="card-icon-big">⚙️</div>
+                    <h3>工具下载</h3>
+                    <p>效率插件 / 实用库</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- 轮播指示器 (移动端直观) -->
-        <div class="indicators" id="indicators"></div>
+    <!-- 第三屏：超大按钮区域（下载10首歌曲）替换原有的三个action卡片 -->
+    <section class="section" id="sec3">
+        <div class="section-bg bg-3"></div>
+        <div class="section-content download-section">
+            <button class="giant-download-btn" id="downloadSongsBtn">
+                <span class="btn-icon">🎵</span>
+                <span class="btn-text">即刻体验 · 下载珍藏</span>
+            </button>
+            <div class="song-tip">
+                🎧 内含10首高品质歌曲 · 链接待配置
+            </div>
+            <p style="color: rgba(255,255,240,0.7); margin-top: 28px; font-size: 14px;">✨ 一键获取合辑，音乐相伴 ✨</p>
+        </div>
+    </section>
 
-        <!-- 底部功能卡片（含所有链接，移动端触控友好，宽度自适应不溢出） -->
-        <div class="card-container">
-            <div class="card" data-url="https://share.feijipan.com/s/wW4wUS7Q">
-                <div class="card-icon">👑</div>
-                <div>
-                    <div class="card-title">软件下载</div>
-                    <div class="card-desc">实用工具免费取</div>
+    <!-- 第四屏 购买音源专区和愿景 -->
+    <section class="section" id="sec4">
+        <div class="section-bg bg-4"></div>
+        <div class="section-content">
+            <div class="shop-row">
+                <div class="shop-info">
+                    <h2>💎 聆澜音源官方店</h2>
+                    <div class="shop-btn" id="buyBtn">前往购买 ▶</div>
                 </div>
-            </div>
-            <div class="card" data-url="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">
-                <div class="card-icon">💎</div>
-                <div>
-                    <div class="card-title">音源下载</div>
-                    <div class="card-desc">畅享音乐的美好</div>
-                </div>
-            </div>
-            <div class="card" data-url="https://shop.guoyue2010.top/">
-                <div class="card-icon">🛒</div>
-                <div>
-                    <div class="card-title">小郭の小店</div>
-                    <div class="card-desc">点击购买聆澜音源</div>
-                </div>
-            </div>
-            <div class="card" data-url="">
-                <div class="card-icon">🎵</div>
-                <div>
-                    <div class="card-title">HI-FI工作室</div>
-                    <div class="card-desc">敬请期待 · 还原录音室的效果</div>
+                <div class="vision-text">
+                    一起学习，一起进步<br>
+                    分享让快乐加倍 · 还原纯粹听感
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- 第五屏 HI-FI工作室 敬请期待 -->
+    <section class="section" id="sec5">
+        <div class="section-bg bg-5"></div>
+        <div class="section-content">
+            <div class="hifi-card">
+                <div class="hifi-icon">🎧</div>
+                <div class="hifi-title">HI-FI工作室</div>
+                <div class="hifi-desc">还原录音室的音频效果 · 敬请期待</div>
+                <div class="footer-note">✨ 持续为音乐爱好者打造极致体验 ✨</div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <script>
     (function() {
-        // ---------- 轮播图逻辑 (优化移动端、手动点击点) ----------
-        const slides = document.querySelectorAll('.banner-slide');
-        let currentIndex = 0;
-        let slideInterval;
-        const totalSlides = slides.length;
+        // ---------- 高性能滚动翻页与Intersection Observer入场动画 ----------
+        const sections = document.querySelectorAll('.section');
+        const container = document.getElementById('scrollContainer');
+        const dotNav = document.getElementById('dotNav');
+        let currentActive = 0;
+        let ticking = false;
 
-        // 创建指示器圆点
-        const indicatorsContainer = document.getElementById('indicators');
-        if (indicatorsContainer && totalSlides > 0) {
-            for (let i = 0; i < totalSlides; i++) {
+        // 建立右侧圆点导航
+        function buildDots() {
+            dotNav.innerHTML = '';
+            sections.forEach((_, idx) => {
                 const dot = document.createElement('div');
-                dot.classList.add('dot');
-                if (i === currentIndex) dot.classList.add('active-dot');
-                dot.dataset.index = i;
+                dot.classList.add('dot-item');
+                if (idx === 0) dot.classList.add('active');
                 dot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetSection = sections[idx];
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+                dotNav.appendChild(dot);
+            });
+        }
+
+        // 基于滚动位置高效更新圆点（使用requestAnimationFrame节流）
+        function updateActiveDot() {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+                let bestIndex = 0;
+                const scrollTop = container.scrollTop;
+                const viewportMid = scrollTop + container.clientHeight / 2;
+                let minDistance = Infinity;
+                sections.forEach((sec, i) => {
+                    const rect = sec.getBoundingClientRect();
+                    const absoluteTop = rect.top + container.scrollTop;
+                    const absoluteBottom = absoluteTop + rect.height;
+                    const center = (absoluteTop + absoluteBottom) / 2;
+                    const distance = Math.abs(center - viewportMid);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        bestIndex = i;
+                    }
+                });
+                if (currentActive !== bestIndex) {
+                    currentActive = bestIndex;
+                    const dots = document.querySelectorAll('.dot-item');
+                    dots.forEach((dot, idx) => {
+                        if (idx === currentActive) dot.classList.add('active');
+                        else dot.classList.remove('active');
+                    });
+                }
+                ticking = false;
+            });
+        }
+
+        // 使用 Intersection Observer 触发入场动画（低配设备友好，只增加class，轻量）
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, { threshold: 0.25, rootMargin: "0px 0px -10px 0px" });
+        
+        sections.forEach(sec => observer.observe(sec));
+
+        // 监听滚动容器更新指示点 & 主动触发动画预检
+        container.addEventListener('scroll', () => {
+            updateActiveDot();
+        });
+        
+        // 初始化位置及首次显示动画
+        setTimeout(() => {
+            sections.forEach(sec => {
+                const rect = sec.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                if (rect.top < containerRect.bottom - 80 && rect.bottom > containerRect.top + 80) {
+                    sec.classList.add('in-view');
+                }
+            });
+            updateActiveDot();
+        }, 150);
+
+        buildDots();
+        
+        // ----- 超大下载按钮（10首歌曲，链接暂留空，用户后续填写）-----
+        const downloadBtn = document.getElementById('downloadSongsBtn');
+        // 预定义10个歌曲占位链接数组（空字符串供用户后续填入）
+        // 为了方便后续维护，用户可在这里填入实际的歌曲下载直链
+        const songLinks = [
+            "",   // 第1首
+            "",   // 第2首
+            "",   // 第3首
+            "",   // 第4首
+            "",   // 第5首
+            "",   // 第6首
+            "",   // 第7首
+            "",   // 第8首
+            "",   // 第9首
+            ""    // 第10首
+        ];
+        
+        // 提供友好的批量下载功能：如果用户未填链接则提示，否则依次触发下载（或打包提示）
+        function downloadSongs() {
+            const validLinks = songLinks.filter(link => link && link.trim() !== "");
+            if (validLinks.length === 0) {
+                showToast('🎵 歌曲下载链接暂未配置，请在代码中 songLinks 数组填入10首歌曲的直链 ~', 2800);
+                return;
+            }
+            // 如果只有部分链接被填写，提示具体数量，并依次打开（为了用户体验，避免过多弹窗拦截）
+            if (validLinks.length < songLinks.length) {
+                showToast(`🎧 当前已配置 ${validLinks.length} 首歌曲，开始下载...`, 2000);
+            } else {
+                showToast(`🎉 10首精选歌曲开始下载，享受音乐盛宴！`, 1800);
+            }
+            // 依次触发下载（在浏览器中通常是打开链接或触发下载，针对直链）
+            // 为了不阻塞用户，创建一个异步队列，避免同时打开太多
+            let index = 0;
+            function openNext() {
+                if (index >= songLinks.length) return;
+                const link = songLinks[index];
+                if (link && link.trim() !== "") {
+                    // 创建一个隐藏的a标签触发下载/打开
+                    const a = document.createElement('a');
+                    a.href = link;
+                    a.target = '_blank';
+                    a.download = ''; // 如果链接支持下载属性，会尝试直接下载，否则新窗口打开
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    // 添加微小延迟避免被浏览器拦截过多弹窗
+                    setTimeout(() => {
+                        index++;
+                        openNext();
+                    }, 300);
+                } else {
+                    index++;
+                    openNext();
+                }
+            }
+            openNext();
+        }
+        
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                downloadSongs();
+            });
+        }
+        
+        // 其他卡片和标签跳转逻辑
+        function initClickHandlers() {
+            const clickableElements = document.querySelectorAll('[data-url]');
+            clickableElements.forEach(el => {
+                el.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const idx = parseInt(dot.dataset.index);
-                    if (!isNaN(idx) && idx !== currentIndex) {
-                        goToSlide(idx);
-                        resetAutoPlay();
+                    const url = el.getAttribute('data-url');
+                    if (url && url.trim() !== '') {
+                        window.open(url, '_blank');
                     }
                 });
-                indicatorsContainer.appendChild(dot);
-            }
-        }
-
-        function updateDots() {
-            const dots = document.querySelectorAll('.dot');
-            if (dots.length) {
-                dots.forEach((dot, idx) => {
-                    if (idx === currentIndex) dot.classList.add('active-dot');
-                    else dot.classList.remove('active-dot');
+            });
+            const buyBtn = document.getElementById('buyBtn');
+            if (buyBtn) {
+                buyBtn.addEventListener('click', () => {
+                    window.open('https://shop.guoyue2010.top/', '_blank');
                 });
             }
-        }
-
-        function showSlide(index) {
-            slides.forEach((slide, i) => {
-                if (i === index) {
-                    slide.classList.add('active');
-                } else {
-                    slide.classList.remove('active');
-                }
-            });
-            currentIndex = index;
-            updateDots();
-        }
-
-        function goToSlide(index) {
-            if (index < 0) index = 0;
-            if (index >= totalSlides) index = 0;
-            showSlide(index);
-        }
-
-        function nextSlide() {
-            let next = (currentIndex + 1) % totalSlides;
-            goToSlide(next);
-        }
-
-        function resetAutoPlay() {
-            if (slideInterval) clearInterval(slideInterval);
-            slideInterval = setInterval(() => {
-                nextSlide();
-            }, 5000);
-        }
-
-        // 启动轮播
-        resetAutoPlay();
-
-        // 触摸/滑动可选支持: 可以附加简单的swipe, 为了移动端舒服，增加滑屏切换(可选)
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const bannerSection = document.querySelector('.banner-section');
-        if (bannerSection) {
-            bannerSection.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-            bannerSection.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                const diff = touchEndX - touchStartX;
-                if (Math.abs(diff) > 60) {
-                    if (diff > 0) {
-                        // 右滑 -> 上一张
-                        let prev = (currentIndex - 1 + totalSlides) % totalSlides;
-                        goToSlide(prev);
-                    } else {
-                        // 左滑 -> 下一张
-                        nextSlide();
-                    }
-                    resetAutoPlay();
-                }
+            const hifiCard = document.querySelector('.hifi-card');
+            if (hifiCard) {
+                hifiCard.style.cursor = 'pointer';
+                hifiCard.addEventListener('click', () => {
+                    showToast('🎧 HI-FI工作室即将上线，敬请期待！', 1800);
+                });
+            }
+            // 重新绑定core-card事件防止遗漏
+            const coreCards = document.querySelectorAll('.core-card');
+            coreCards.forEach(card => {
+                if (!card.hasAttribute('data-url')) return;
+                card.style.cursor = 'pointer';
             });
         }
-
-        // ----- 标签点击跳转功能 -----
-        const tags = document.querySelectorAll('.tag');
-        tags.forEach(tag => {
-            tag.addEventListener('click', (e) => {
-                e.stopPropagation();
-                let link = tag.getAttribute('data-link');
-                if (link && link !== '') {
-                    window.open(link, '_blank');
-                } else {
-                    // 若无data-link，给默认柔和的反馈
-                    if (tag.innerText.includes('LX Music')) {
-                        window.open('https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/', '_blank');
-                    } else if (tag.innerText.includes('Sollin')) {
-                        window.open('https://share.feijipan.com/s/wW4wUS7Q', '_blank');
-                    } else if (tag.innerText.includes('HI-FI资源')) {
-                        window.open('https://share.feijipan.com/s/E94vKi0G', '_blank');
-                    } else {
-                        alert('即将开放更多资源，请持续关注~');
-                    }
-                }
-            });
-        });
-
-        // ----- 底部卡片跳转 (统一处理所有卡片) -----
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.stopPropagation();
-                let url = card.getAttribute('data-url');
-                // 第四个卡片没有链接的情况特殊处理
-                if (url && url.trim() !== '') {
-                    window.open(url, '_blank');
-                } else {
-                    // HI-FI工作室敬请期待提示
-                    if (card.querySelector('.card-title') && card.querySelector('.card-title').innerText.includes('HI-FI')) {
-                        // 优雅轻提示（移动端友好toast效果）
-                        showToast('🎧 HI-FI工作室即将上线，敬请期待！', 1800);
-                    } else {
-                        showToast('链接准备中，稍后开放✨', 1500);
-                    }
-                }
-            });
-        });
-
-        // 简单轻提示函数 (移动端优雅)
-        function showToast(msg, duration = 2000) {
-            let toast = document.querySelector('.mobile-toast');
+        
+        function showToast(msg, duration = 2200) {
+            let toast = document.querySelector('.global-toast');
             if (!toast) {
                 const div = document.createElement('div');
-                div.className = 'mobile-toast';
-                div.style.cssText = `
-                    position: fixed;
-                    bottom: 30%;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: rgba(0,0,0,0.8);
-                    backdrop-filter: blur(12px);
-                    color: white;
-                    padding: 10px 20px;
-                    border-radius: 40px;
-                    font-size: 14px;
-                    font-weight: 500;
-                    z-index: 9999;
-                    white-space: nowrap;
-                    max-width: 85vw;
-                    text-align: center;
-                    white-space: normal;
-                    word-break: keep-all;
-                    pointer-events: none;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                    border: 0.5px solid rgba(255,255,255,0.2);
-                `;
+                div.className = 'global-toast';
+                div.style.cssText = `position:fixed; bottom:25%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); color:#fff; padding:10px 24px; border-radius:40px; font-size:14px; z-index:10000; max-width:85vw; text-align:center; pointer-events:none; font-weight:500; border:1px solid rgba(255,255,255,0.2); white-space:normal; word-break:break-word;`;
                 document.body.appendChild(div);
                 toast = div;
             }
             toast.innerText = msg;
             toast.style.opacity = '1';
-            toast.style.transition = 'opacity 0.2s';
             clearTimeout(window.toastTimer);
             window.toastTimer = setTimeout(() => {
                 toast.style.opacity = '0';
             }, duration);
         }
 
-        // 修复卡片第四个的空链接触发表单提示
-        const fourthCard = cards[3];
-        if (fourthCard && !fourthCard.getAttribute('data-url')) {
-            fourthCard.setAttribute('data-url', '');
-        }
-
-        // 移动端防止点击卡片导致误触背景轮播切换
-        cards.forEach(card => {
-            card.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
-        });
-        tags.forEach(tag => {
-            tag.addEventListener('touchstart', (e) => {
-                e.stopPropagation();
-            });
-        });
-
-        // 处理头像点击无跳转仅装饰，但可以加小趣味(不影响)
-        const avatarDiv = document.querySelector('.avatar');
-        if(avatarDiv) {
-            avatarDiv.addEventListener('click', () => {
-                showToast('✨ TZB679 の 奇妙空间 ✨', 1200);
-            });
-        }
+        initClickHandlers();
         
-        // 优化页面初始，强制确保所有卡片、文字不溢出，重排边缘
-        function fixOverflow() {
-            const container = document.querySelector('.card-container');
-            if (container && window.innerWidth < 550) {
-                // 极窄情况可适当微调节
-                const cardsWidth = container.children.length;
-                if (cardsWidth > 2 && window.innerWidth < 400) {
-                    // 什么都不做，css负责换行，无需额外
-                }
-            }
-        }
-        window.addEventListener('resize', () => fixOverflow());
-        fixOverflow();
-
-        // 轮播时保证指示器随动自动更新，并且挂载保留手动重置interval避免重复
-        const originalGoTo = goToSlide;
-        window.goToSlide = goToSlide;
-        // 确保页面unload时清除定时器(性能)
-        window.addEventListener('beforeunload', () => {
-            if (slideInterval) clearInterval(slideInterval);
-        });
+        // 添加样式提升兼容性 & 低配设备强制使用will-change优化
+        const style = document.createElement('style');
+        style.textContent = `
+            .section-bg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: brightness(0.88); z-index: 0; }
+            .section, .section-content, .giant-download-btn { will-change: transform; }
+            .scroll-container { scrollbar-width: thin; }
+        `;
+        document.head.appendChild(style);
     })();
 </script>
 </body>
