@@ -2,14 +2,20 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>TZB679の个人主页</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent; /* 移除移动端点击灰层 */
+        }
+
+        body {
+            background-color: #f0f4f8;
+            overflow-x: hidden;
+            width: 100%;
         }
 
         /* 整体容器 */
@@ -17,63 +23,91 @@
             width: 100%;
             min-height: 100vh;
             background-color: #f0f4f8;
+            overflow-x: hidden;
         }
 
-        /* 顶部导航栏 */
+        /* ========= 顶部导航栏 - 移动端适配 ========= */
         .header-nav {
             width: 100%;
-            height: 60px;
-            background-color: rgba(255,255,255,0.9);
-            backdrop-filter: blur(8px);
+            height: 56px;
+            background-color: rgba(255,255,255,0.96);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 16px;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            /* 防止溢出 */
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         .nav-left {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
+            flex-wrap: nowrap;
         }
 
         .avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background-color: #e0e7ff;
             background-image: url("https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/small.png");
             background-size: cover;
             background-position: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(64,158,255,0.2);
         }
 
         .nav-links {
             display: flex;
-            gap: 40px;
+            gap: 24px;
+            flex-wrap: nowrap;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: #333;
-            font-size: 16px;
-            transition: color 0.3s;
+            color: #2c3e4e;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
         }
 
         .nav-links a:hover {
             color: #409eff;
         }
 
-        /* Banner轮播区域 */
+        /* 移动端缩小间距，防止挤爆 */
+        @media (max-width: 480px) {
+            .nav-left {
+                gap: 12px;
+            }
+            .nav-links {
+                gap: 18px;
+            }
+            .nav-links a {
+                font-size: 13px;
+            }
+            .header-nav {
+                padding: 0 12px;
+            }
+        }
+
+        /* ========= Banner轮播区域 (全屏但内容适配高度) ========= */
         .banner-section {
             width: 100%;
             height: 100vh;
             position: relative;
             overflow: hidden;
-            margin-top: 60px;
+            margin-top: 56px;
+            background-color: #0a0c15;
         }
 
         .banner-slider {
@@ -89,12 +123,11 @@
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
-            /* 背景图不透明度通过伪元素实现，本身不设背景图，改用伪元素 */
-            background-color: #2a2a2a; /* 底色，增加文字对比 */
+            transition: opacity 0.9s ease-in-out;
+            background-color: #131725; /* 优雅暗色底 */
         }
 
-        /* 背景图片伪元素，控制不透明度50% */
+        /* 背景图半透明拟态 */
         .banner-slide::before {
             content: "";
             position: absolute;
@@ -103,36 +136,33 @@
             width: 100%;
             height: 100%;
             background-size: cover;
-            background-position: center;
+            background-position: center 30%;
             background-repeat: no-repeat;
-            opacity: 0.5;
-            transition: opacity 1s ease-in-out;
+            opacity: 0.45;
+            transition: opacity 0.9s ease;
             z-index: 0;
         }
 
-        /* 每个轮播图单独指定背景图到伪元素 */
-        .banner-slide:nth-child(1)::before {
-            background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg');
+        /* 移动端背景图稍微调高一点位置优化 */
+        @media (max-width: 768px) {
+            .banner-slide::before {
+                background-position: center 40%;
+            }
         }
-        .banner-slide:nth-child(2)::before {
-            background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png');
-        }
-        .banner-slide:nth-child(3)::before {
-            background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg');
-        }
-        .banner-slide:nth-child(4)::before {
-            background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg');
-        }
-        .banner-slide:nth-child(5)::before {
-            background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg');
-        }
+
+        /* 五张轮播图资源 */
+        .banner-slide:nth-child(1)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg'); }
+        .banner-slide:nth-child(2)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png'); }
+        .banner-slide:nth-child(3)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg'); }
+        .banner-slide:nth-child(4)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg'); }
+        .banner-slide:nth-child(5)::before { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg'); }
 
         .banner-slide.active {
             opacity: 1;
             z-index: 1;
         }
 
-        /* 文字内容在伪元素之上 */
+        /* 文字内容弹性盒，确保垂直居中且不溢出 */
         .banner-content {
             position: absolute;
             top: 50%;
@@ -140,140 +170,295 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-            width: 100%;
-            padding: 0 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            width: 90%;
+            max-width: 600px;
+            padding: 0 16px;
             z-index: 2;
+            backdrop-filter: blur(2px);
+            border-radius: 24px;
         }
 
         .banner-title {
-            font-size: 36px;
-            margin-bottom: 10px;
+            font-size: clamp(1.6rem, 7vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+            word-break: break-word;
         }
 
         .banner-subtitle {
-            font-size: 20px;
-            margin-bottom: 40px;
+            font-size: clamp(0.9rem, 4vw, 1.25rem);
+            margin-bottom: 28px;
+            opacity: 0.95;
+            font-weight: 500;
+            word-break: break-word;
         }
 
-        /* 标签栏 */
+        /* 标签容器-移动端紧凑且支持换行 */
         .tag-container {
             display: flex;
             gap: 12px;
             justify-content: center;
-            margin-top: 30px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding: 0 8px;
         }
 
         .tag {
-            padding: 8px 16px;
-            background-color: rgba(0,0,0,0.65);
-            backdrop-filter: blur(4px);
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 6px 18px;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
             color: white;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.35);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .tag {
+                padding: 5px 14px;
+                font-size: 12px;
+            }
+            .tag-container {
+                gap: 8px;
+            }
         }
 
         .tag:hover {
             background-color: #409eff;
-            color: white;
             border-color: transparent;
+            transform: scale(1.02);
         }
 
-        /* 底部功能卡片 */
+        /* ========= 底部卡片 - 移动端响应式网格 ========= */
         .card-container {
             position: absolute;
-            bottom: 50px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
-            width: 90%;
-            max-width: 1200px;
-            z-index: 10;
+            gap: 14px;
+            width: 92%;
+            max-width: 1300px;
+            z-index: 20;
+            flex-wrap: wrap;
+            justify-content: center;
+            pointer-events: none; /* 父级不干扰，子级可点 */
         }
 
         .card {
-            flex: 1;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
-            padding: 20px;
+            flex: 1 1 180px;
+            min-width: 140px;
+            background-color: rgba(10, 15, 27, 0.82);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 14px 12px;
             display: flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: auto;
+            /* 防止溢出 */
+            word-break: break-word;
+        }
+
+        @media (max-width: 640px) {
+            .card-container {
+                gap: 12px;
+                bottom: 20px;
+                width: 95%;
+            }
+            .card {
+                flex: 1 1 160px;
+                padding: 12px 10px;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .card-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .card {
+                flex: 1 1 42%; /* 两列布局 */
+                min-width: 130px;
+                padding: 10px 8px;
+            }
+            .card-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 18px;
+            }
+            .card-title {
+                font-size: 14px;
+            }
+            .card-desc {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .card {
+                flex: 1 1 100%; /* 超小屏单列但美观 */
+                min-width: auto;
+            }
+            .card-container {
+                gap: 10px;
+                bottom: 18px;
+            }
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            background-color: rgba(0,0,0,0.85);
+            transform: translateY(-4px);
+            background-color: rgba(0, 0, 0, 0.88);
+            border-color: rgba(64, 158, 255, 0.5);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
         }
 
         .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 18px;
+            font-size: 20px;
+            background-color: rgba(0,0,0,0.4);
+            flex-shrink: 0;
         }
 
-        .card:nth-child(1) .card-icon {
-            background-color: #ff7d00;
-        }
-
-        .card:nth-child(2) .card-icon {
-            background-color: #722ed1;
-        }
-
-        .card:nth-child(3) .card-icon {
-            background-color: #ff4d4f;
-        }
-
-        .card:nth-child(4) .card-icon {
-            background-color: #13c2c2;
-        }
+        .card:nth-child(1) .card-icon { background-color: #ff7d00; box-shadow: 0 2px 6px rgba(255,125,0,0.3);}
+        .card:nth-child(2) .card-icon { background-color: #722ed1; }
+        .card:nth-child(3) .card-icon { background-color: #ff4d4f; }
+        .card:nth-child(4) .card-icon { background-color: #13c2c2; }
 
         .card-title {
-            font-size: 18px;
+            font-size: 15px;
+            font-weight: 600;
             color: #fff;
             margin-bottom: 4px;
+            line-height: 1.3;
         }
 
         .card-desc {
-            font-size: 14px;
-            color: #ddd;
+            font-size: 12px;
+            color: #e0e0e0;
+            opacity: 0.85;
+            line-height: 1.2;
         }
 
-        /* 确保文字和卡片不被背景干扰 */
-        .banner-slide {
-            background-color: #1a1a2e;
+        /* 针对卡片文字换行优化 */
+        @media (max-width: 500px) {
+            .card-title {
+                font-size: 13px;
+            }
+            .card-desc {
+                font-size: 10px;
+            }
+        }
+
+        /* 修复内容区域避免被底部卡片遮挡严重 (移动端底部预留空间) */
+        .banner-section {
+            position: relative;
+        }
+
+        /* 为了让卡片不遮挡轮播文字太严重，适当增强文字底部留白（内容区自适应） */
+        .banner-content {
+            margin-bottom: 20px;
+        }
+
+        /* 微调卡片区域在极短屏下仍保证可视 */
+        @media (max-height: 700px) {
+            .card-container {
+                bottom: 12px;
+            }
+            .banner-content {
+                transform: translate(-50%, -55%);
+            }
+        }
+
+        /* 平滑滚动 & 基础排版 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 点击卡片涟漪效果（可选） */
+        .card:active {
+            transform: scale(0.98);
+            transition: transform 0.05s;
+        }
+
+        /* 轮播指示器增加圆点 (可选但优雅) 提升移动端交互提示 */
+        .indicators {
+            position: absolute;
+            bottom: 140px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 15;
+            pointer-events: none;
+        }
+        @media (max-width: 640px) {
+            .indicators {
+                bottom: 130px;
+            }
+        }
+        @media (max-height: 700px) {
+            .indicators {
+                bottom: 120px;
+            }
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.5);
+            transition: all 0.2s;
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+        }
+
+        .dot.active-dot {
+            width: 24px;
+            background: #409eff;
+            box-shadow: 0 0 6px #409eff;
+        }
+
+        /* 防止卡片遮住指示器点击区域, 提升体验 */
+        .card-container {
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
-    <!-- 顶部导航栏 -->
+<div class="container">
+    <!-- 顶部导航栏 移动端自适应无溢出 -->
     <div class="header-nav">
         <div class="nav-left">
             <div class="avatar"></div>
             <div class="nav-links">
-                <a href="https://share.feijipan.com/s/wW4wUS7Q" target="_blank">软件下载</a>
-                <a href="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/" target="_blank">音源</a>
-                <a href="https://share.feijipan.com/s/E94vKi0G" target="_blank">工具下载</a>
+                <a href="https://share.feijipan.com/s/wW4wUS7Q" target="_blank" rel="noopener noreferrer">软件下载</a>
+                <a href="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/" target="_blank" rel="noopener noreferrer">音源</a>
+                <a href="https://share.feijipan.com/s/E94vKi0G" target="_blank" rel="noopener noreferrer">工具下载</a>
             </div>
         </div>
     </div>
 
-    <!-- Banner轮播区域 -->
+    <!-- Banner轮播区域 优化背景缩放 -->
     <div class="banner-section">
         <div class="banner-slider">
             <!-- 轮播图1 -->
@@ -282,9 +467,9 @@
                     <h1 class="banner-title">HI〰️欢迎来到我的主页...</h1>
                     <p class="banner-subtitle">没有看不到的，只有想不到的</p>
                     <div class="tag-container">
-                        <div class="tag">LX Music</div>
-                        <div class="tag">Sollin</div>
-                        <div class="tag">HI-FI资源</div>
+                        <div class="tag" data-link="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">LX Music</div>
+                        <div class="tag" data-link="https://share.feijipan.com/s/wW4wUS7Q">Sollin</div>
+                        <div class="tag" data-link="https://share.feijipan.com/s/E94vKi0G">HI-FI资源</div>
                     </div>
                 </div>
             </div>
@@ -318,56 +503,271 @@
             </div>
         </div>
 
-        <!-- 底部功能卡片（带跳转链接） -->
+        <!-- 轮播指示器 (移动端直观) -->
+        <div class="indicators" id="indicators"></div>
+
+        <!-- 底部功能卡片（含所有链接，移动端触控友好，宽度自适应不溢出） -->
         <div class="card-container">
-            <div class="card" onclick="location.href='https://share.feijipan.com/s/wW4wUS7Q'">
+            <div class="card" data-url="https://share.feijipan.com/s/wW4wUS7Q">
                 <div class="card-icon">👑</div>
                 <div>
                     <div class="card-title">软件下载</div>
-                    <div class="card-desc">进入软件下载页面</div>
+                    <div class="card-desc">实用工具免费取</div>
                 </div>
             </div>
-            <div class="card" onclick="location.href='https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/'">
+            <div class="card" data-url="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">
                 <div class="card-icon">💎</div>
                 <div>
                     <div class="card-title">音源下载</div>
-                    <div class="card-desc">开始畅享音乐的美好</div>
+                    <div class="card-desc">畅享音乐的美好</div>
                 </div>
             </div>
-            <div class="card" onclick="location.href='https://shop.guoyue2010.top/'">
+            <div class="card" data-url="https://shop.guoyue2010.top/">
                 <div class="card-icon">🛒</div>
                 <div>
-                    <div class="card-title">购买音源</div>
-                    <div class="card-desc">前往购买聆澜音源</div>
+                    <div class="card-title">小郭の小店</div>
+                    <div class="card-desc">点击购买聆澜音源</div>
                 </div>
             </div>
-            <div class="card" onclick="location.href=''">
+            <div class="card" data-url="">
                 <div class="card-icon">🎵</div>
                 <div>
-                    <div class="card-title">HI-FI工作室（敬请期待）</div>
-                    <div class="card-desc">还原录音室的音频效果</div>
+                    <div class="card-title">HI-FI工作室</div>
+                    <div class="card-desc">敬请期待 · 还原录音室的效果</div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Banner轮播逻辑
+<script>
+    (function() {
+        // ---------- 轮播图逻辑 (优化移动端、手动点击点) ----------
         const slides = document.querySelectorAll('.banner-slide');
-        let currentSlide = 0;
+        let currentIndex = 0;
+        let slideInterval;
+        const totalSlides = slides.length;
+
+        // 创建指示器圆点
+        const indicatorsContainer = document.getElementById('indicators');
+        if (indicatorsContainer && totalSlides > 0) {
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === currentIndex) dot.classList.add('active-dot');
+                dot.dataset.index = i;
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(dot.dataset.index);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        goToSlide(idx);
+                        resetAutoPlay();
+                    }
+                });
+                indicatorsContainer.appendChild(dot);
+            }
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.dot');
+            if (dots.length) {
+                dots.forEach((dot, idx) => {
+                    if (idx === currentIndex) dot.classList.add('active-dot');
+                    else dot.classList.remove('active-dot');
+                });
+            }
+        }
 
         function showSlide(index) {
-            slides.forEach(slide => slide.classList.remove('active'));
-            slides[index].classList.add('active');
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            currentIndex = index;
+            updateDots();
+        }
+
+        function goToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = 0;
+            showSlide(index);
         }
 
         function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            showSlide(currentSlide);
+            let next = (currentIndex + 1) % totalSlides;
+            goToSlide(next);
         }
 
-        // 自动轮播，每5秒切换一次
-        setInterval(nextSlide, 5000);
-    </script>
+        function resetAutoPlay() {
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                nextSlide();
+            }, 5000);
+        }
+
+        // 启动轮播
+        resetAutoPlay();
+
+        // 触摸/滑动可选支持: 可以附加简单的swipe, 为了移动端舒服，增加滑屏切换(可选)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const bannerSection = document.querySelector('.banner-section');
+        if (bannerSection) {
+            bannerSection.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            bannerSection.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchEndX - touchStartX;
+                if (Math.abs(diff) > 60) {
+                    if (diff > 0) {
+                        // 右滑 -> 上一张
+                        let prev = (currentIndex - 1 + totalSlides) % totalSlides;
+                        goToSlide(prev);
+                    } else {
+                        // 左滑 -> 下一张
+                        nextSlide();
+                    }
+                    resetAutoPlay();
+                }
+            });
+        }
+
+        // ----- 标签点击跳转功能 -----
+        const tags = document.querySelectorAll('.tag');
+        tags.forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let link = tag.getAttribute('data-link');
+                if (link && link !== '') {
+                    window.open(link, '_blank');
+                } else {
+                    // 若无data-link，给默认柔和的反馈
+                    if (tag.innerText.includes('LX Music')) {
+                        window.open('https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/', '_blank');
+                    } else if (tag.innerText.includes('Sollin')) {
+                        window.open('https://share.feijipan.com/s/wW4wUS7Q', '_blank');
+                    } else if (tag.innerText.includes('HI-FI资源')) {
+                        window.open('https://share.feijipan.com/s/E94vKi0G', '_blank');
+                    } else {
+                        alert('即将开放更多资源，请持续关注~');
+                    }
+                }
+            });
+        });
+
+        // ----- 底部卡片跳转 (统一处理所有卡片) -----
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let url = card.getAttribute('data-url');
+                // 第四个卡片没有链接的情况特殊处理
+                if (url && url.trim() !== '') {
+                    window.open(url, '_blank');
+                } else {
+                    // HI-FI工作室敬请期待提示
+                    if (card.querySelector('.card-title') && card.querySelector('.card-title').innerText.includes('HI-FI')) {
+                        // 优雅轻提示（移动端友好toast效果）
+                        showToast('🎧 HI-FI工作室即将上线，敬请期待！', 1800);
+                    } else {
+                        showToast('链接准备中，稍后开放✨', 1500);
+                    }
+                }
+            });
+        });
+
+        // 简单轻提示函数 (移动端优雅)
+        function showToast(msg, duration = 2000) {
+            let toast = document.querySelector('.mobile-toast');
+            if (!toast) {
+                const div = document.createElement('div');
+                div.className = 'mobile-toast';
+                div.style.cssText = `
+                    position: fixed;
+                    bottom: 30%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0,0,0,0.8);
+                    backdrop-filter: blur(12px);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 40px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 9999;
+                    white-space: nowrap;
+                    max-width: 85vw;
+                    text-align: center;
+                    white-space: normal;
+                    word-break: keep-all;
+                    pointer-events: none;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    border: 0.5px solid rgba(255,255,255,0.2);
+                `;
+                document.body.appendChild(div);
+                toast = div;
+            }
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.transition = 'opacity 0.2s';
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, duration);
+        }
+
+        // 修复卡片第四个的空链接触发表单提示
+        const fourthCard = cards[3];
+        if (fourthCard && !fourthCard.getAttribute('data-url')) {
+            fourthCard.setAttribute('data-url', '');
+        }
+
+        // 移动端防止点击卡片导致误触背景轮播切换
+        cards.forEach(card => {
+            card.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            });
+        });
+        tags.forEach(tag => {
+            tag.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // 处理头像点击无跳转仅装饰，但可以加小趣味(不影响)
+        const avatarDiv = document.querySelector('.avatar');
+        if(avatarDiv) {
+            avatarDiv.addEventListener('click', () => {
+                showToast('✨ TZB679 の 奇妙空间 ✨', 1200);
+            });
+        }
+        
+        // 优化页面初始，强制确保所有卡片、文字不溢出，重排边缘
+        function fixOverflow() {
+            const container = document.querySelector('.card-container');
+            if (container && window.innerWidth < 550) {
+                // 极窄情况可适当微调节
+                const cardsWidth = container.children.length;
+                if (cardsWidth > 2 && window.innerWidth < 400) {
+                    // 什么都不做，css负责换行，无需额外
+                }
+            }
+        }
+        window.addEventListener('resize', () => fixOverflow());
+        fixOverflow();
+
+        // 轮播时保证指示器随动自动更新，并且挂载保留手动重置interval避免重复
+        const originalGoTo = goToSlide;
+        window.goToSlide = goToSlide;
+        // 确保页面unload时清除定时器(性能)
+        window.addEventListener('beforeunload', () => {
+            if (slideInterval) clearInterval(slideInterval);
+        });
+    })();
+</script>
 </body>
 </html>
