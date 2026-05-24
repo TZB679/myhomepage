@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <title>TZB679の个人主页 | （新ui测试版）</title>
+    <title>TZB679の个人主页</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,6 @@
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            /* 提升滚动性能 */
             will-change: scroll-position;
         }
 
@@ -43,12 +42,11 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            /* 硬件加速 */
             transform: translateZ(0);
             backface-visibility: hidden;
         }
 
-        /* 区块内容容器 - 优化动画性能，使用transform而非margin/padding */
+        /* 区块内容容器 - 入场动画 */
         .section-content {
             width: 90%;
             max-width: 1300px;
@@ -62,18 +60,12 @@
             will-change: transform, opacity;
         }
 
-        /* 入场动画触发类 */
         .section.in-view .section-content {
             opacity: 1;
             transform: translateY(0) translateZ(0);
         }
 
-        /* 延迟动画辅助 */
-        .delay-1 { transition-delay: 0.08s; }
-        .delay-2 { transition-delay: 0.16s; }
-        .delay-3 { transition-delay: 0.26s; }
-
-        /* ========= 背景图统一样式（半透明叠加，提升文字可读性） ========= */
+        /* 动态背景容器 (负责横竖屏切换) */
         .section-bg {
             position: absolute;
             top: 0;
@@ -85,7 +77,9 @@
             background-repeat: no-repeat;
             z-index: 0;
             transform: translateZ(0);
+            transition: background-image 0.25s ease-out;
         }
+        /* 半透明遮罩 + 轻微模糊提升可读性 */
         .section-bg::after {
             content: "";
             position: absolute;
@@ -93,12 +87,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.55);
+            background: rgba(0, 0, 0, 0.52);
             backdrop-filter: blur(3px);
             z-index: 1;
         }
 
-        /* ========= 导航栏（固定顶部，保持原样） ========= */
+        /* ========= 导航栏（固定顶部） ========= */
         .header-nav {
             width: 100%;
             height: 60px;
@@ -152,7 +146,7 @@
             .avatar { width: 34px; height: 34px; }
         }
 
-        /* ========= 右侧导航圆点（更丝滑指示） ========= */
+        /* ========= 右侧导航圆点 ========= */
         .dot-nav {
             position: fixed;
             right: 24px;
@@ -184,7 +178,7 @@
             .dot-item.active { width: 22px; }
         }
 
-        /* ========= 第一屏样式（欢迎屏+标签） ========= */
+        /* ========= 各屏内部样式 ========= */
         .section-1 .section-content {
             text-align: center;
             color: white;
@@ -228,7 +222,7 @@
             .tag-group { gap: 12px; }
         }
 
-        /* ========= 第二屏：核心服务卡片区（软件/音源/工具） ========= */
+        /* 第二屏卡片 */
         .cards-grid {
             display: flex;
             flex-wrap: wrap;
@@ -281,70 +275,88 @@
             .core-card h3 { font-size: 1.3rem; }
         }
 
-        /* ========= 第三屏：超大下载按钮（10首歌曲） ========= */
-        .download-section {
+        /* 第三屏 全新设计：点击耳机下载1首歌 */
+        .song-download-area {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(18px);
+            border-radius: 72px;
+            padding: 52px 36px;
+            max-width: 750px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 215, 150, 0.3);
+            transition: all 0.3s ease;
         }
-        .giant-download-btn {
-            background: linear-gradient(135deg, #ff6b35, #f5574c);
-            border: none;
-            border-radius: 80px;
-            padding: 24px 56px;
+        .download-headphone {
+            background: linear-gradient(145deg, #2c2f3a, #1a1c26);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2);
-            box-shadow: 0 20px 35px -10px rgba(245, 87, 76, 0.5);
-            margin-bottom: 32px;
-            display: inline-flex;
+            box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: none;
+            margin-bottom: 28px;
+        }
+        .download-headphone:hover {
+            transform: scale(1.05);
+            background: linear-gradient(145deg, #409eff, #2c6baf);
+            box-shadow: 0 28px 40px -12px #409eff80;
+        }
+        .download-headphone:active {
+            transform: scale(0.96);
+        }
+        .headphone-icon {
+            font-size: 68px;
+            filter: drop-shadow(2px 6px 12px rgba(0,0,0,0.3));
+            color: #ffefc0;
+        }
+        .download-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE6B0, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .download-desc {
+            font-size: 1rem;
+            color: rgba(255, 250, 225, 0.85);
+            max-width: 380px;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+        .song-meta {
+            margin-top: 28px;
+            display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 14px;
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 60px;
+            padding: 8px 24px;
+            font-size: 14px;
+            color: #ffda99;
             backdrop-filter: blur(4px);
         }
-        .giant-download-btn:hover {
-            transform: scale(1.03);
-            box-shadow: 0 28px 40px -12px rgba(245, 87, 76, 0.7);
-        }
-        .giant-download-btn:active {
-            transform: scale(0.98);
-        }
-        .btn-icon {
-            font-size: 48px;
-            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.2));
-        }
-        .btn-text {
-            font-size: clamp(1.5rem, 6vw, 2.4rem);
-            font-weight: 800;
-            color: white;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .btn-sub {
+        .song-meta span {
             font-size: 16px;
-            color: rgba(255,255,255,0.9);
-            margin-top: 8px;
-            font-weight: 500;
-        }
-        .song-tip {
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(12px);
-            border-radius: 48px;
-            padding: 12px 28px;
-            color: #ffd966;
-            font-size: 15px;
-            display: inline-block;
-            margin-top: 20px;
         }
         @media (max-width: 650px) {
-            .giant-download-btn { padding: 18px 32px; gap: 12px; }
-            .btn-icon { font-size: 36px; }
-            .btn-text { font-size: 1.3rem; }
-            .song-tip { font-size: 12px; padding: 8px 20px; }
+            .song-download-area { padding: 36px 24px; }
+            .download-headphone { width: 110px; height: 110px; }
+            .headphone-icon { font-size: 52px; }
         }
 
-        /* ========= 第四屏：购买音源 + 愿景 ========= */
+        /* 第四屏商店愿景 */
         .shop-row {
             display: flex;
             flex-wrap: wrap;
@@ -396,7 +408,7 @@
             .vision-text { border-left: none; border-top: 2px solid #409eff; padding-top: 20px; padding-left: 0; }
         }
 
-        /* ========= 第五屏：HI-FI工作室 & 结尾 ========= */
+        /* 第五屏 HI-FI工作室 */
         .hifi-card {
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(12px);
@@ -426,22 +438,11 @@
             color: #aaa;
         }
 
-        /* 各区块单独背景图 (复用原有图片资源) */
-        .bg-1 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg'); }
-        .bg-2 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png'); }
-        .bg-3 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg'); }
-        .bg-4 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg'); }
-        .bg-5 { background-image: url('https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg'); }
-
-        .section-bg {
-            background-size: cover;
-            background-position: center 30%;
-        }
-
-        /* 全局toast轻提示 */
+        /* 全局toast */
         .global-toast {
             transition: opacity 0.2s;
         }
+        .scroll-container { scrollbar-width: thin; }
     </style>
 </head>
 <body>
@@ -460,23 +461,23 @@
 <div class="dot-nav" id="dotNav"></div>
 
 <div class="scroll-container" id="scrollContainer">
-    <!-- 第一屏 欢迎屏 + 原有标签 -->
+    <!-- 第一屏 欢迎屏 -->
     <section class="section section-1" id="sec1">
-        <div class="section-bg bg-1"></div>
+        <div class="section-bg" id="bg1"></div>
         <div class="section-content">
             <h1 class="main-title">HI〰️ 欢迎来到我的主页</h1>
             <p class="sub-punch">没有看不到的，只有想不到的</p>
             <div class="tag-group">
                 <div class="tag" data-url="https://tzb679.github.io/USEFUL-LX-MUSIC-SOURCES/">LX Music</div>
-                <div class="tag" data-url="https://share.feijipan.com/s/wW4wUS7Q">Sollin</div>
+                <div class="tag" data-url="https://share.feijipan.com/s/wW4wUS7Q">Sollin Player</div>
                 <div class="tag" data-url="https://share.feijipan.com/s/E94vKi0G">HI-FI资源</div>
             </div>
         </div>
     </section>
 
-    <!-- 第二屏 核心服务卡片（软件下载、音源下载、工具下载）整合展示 -->
+    <!-- 第二屏 核心服务卡片 -->
     <section class="section" id="sec2">
-        <div class="section-bg bg-2"></div>
+        <div class="section-bg" id="bg2"></div>
         <div class="section-content">
             <h2 class="section-title">✨ 精选资源直达 ✨</h2>
             <div class="cards-grid">
@@ -499,28 +500,32 @@
         </div>
     </section>
 
-    <!-- 第三屏：超大按钮区域（下载10首歌曲）->
+    <!-- 第三屏 点击耳机下载1首歌 -->
     <section class="section" id="sec3">
-        <div class="section-bg bg-3"></div>
-        <div class="section-content download-section">
-            <button class="giant-download-btn" id="downloadSongsBtn">
-                <span class="btn-icon">🎵</span>
-                <span class="btn-text">即刻体验 · 下载珍藏</span>
-            </button>
-            <div class="song-tip">
-                🎧 内含10首高品质歌曲 · 链接待配置
+        <div class="section-bg" id="bg3"></div>
+        <div class="section-content">
+            <div class="song-download-area">
+                <button class="download-headphone" id="downloadSingleSongBtn" aria-label="点我有惊喜">
+                    <span class="headphone-icon">🎧</span>
+                </button>
+                <div class="download-title">点击耳机 · 下载单曲</div>
+                <div class="download-desc">
+                    
+                </div>
+                <div class="song-meta">
+                    <span>✨</span> 点击耳机即刻下载 <span>🎵</span>
+                </div>
             </div>
-            <p style="color: rgba(255,255,240,0.7); margin-top: 28px; font-size: 14px;">✨ 一键获取合辑，音乐相伴 ✨</p>
         </div>
     </section>
 
-    <!-- 第四屏 购买音源专区和愿景 -->
+    <!-- 第四屏 购买音源专区 -->
     <section class="section" id="sec4">
-        <div class="section-bg bg-4"></div>
+        <div class="section-bg" id="bg4"></div>
         <div class="section-content">
             <div class="shop-row">
                 <div class="shop-info">
-                    <h2>💎 聆澜音源官方店</h2>
+                    <h2>💎 聆澜音源</h2>
                     <div class="shop-btn" id="buyBtn">前往购买 ▶</div>
                 </div>
                 <div class="vision-text">
@@ -531,9 +536,9 @@
         </div>
     </section>
 
-    <!-- 第五屏 HI-FI工作室 敬请期待 -->
+    <!-- 第五屏 HI-FI工作室 -->
     <section class="section" id="sec5">
-        <div class="section-bg bg-5"></div>
+        <div class="section-bg" id="bg5"></div>
         <div class="section-content">
             <div class="hifi-card">
                 <div class="hifi-icon">🎧</div>
@@ -547,14 +552,69 @@
 
 <script>
     (function() {
-        // ---------- 高性能滚动翻页与Intersection Observer入场动画 ----------
+        // ======================== 横竖屏自适应背景配置 ========================
+        const landscapeImages = [
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic1.jpeg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic2.png",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic3.jpg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic4.jpeg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/pic5.jpg"
+        ];
+        
+        const portraitImages = [
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/mobile/mobile3.png",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/mobile/mobile1.jpg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/mobile/mobile2.jpg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/mobile/mobile4.jpg",
+            "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/mobile/mobile5.jpg"
+        ];
+        
+        const bgElements = [
+            document.getElementById('bg1'),
+            document.getElementById('bg2'),
+            document.getElementById('bg3'),
+            document.getElementById('bg4'),
+            document.getElementById('bg5')
+        ];
+        
+        function isPortrait() {
+            return window.innerHeight > window.innerWidth;
+        }
+        
+        function updateAllBackgrounds() {
+            const portraitMode = isPortrait();
+            for (let i = 0; i < bgElements.length; i++) {
+                const bgDiv = bgElements[i];
+                if (bgDiv) {
+                    const imgUrl = portraitMode ? portraitImages[i] : landscapeImages[i];
+                    if (imgUrl && imgUrl.trim() !== "") {
+                        bgDiv.style.backgroundImage = `url('${imgUrl}')`;
+                    }
+                }
+            }
+        }
+        
+        let resizeTimer;
+        function handleOrientationChange() {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateAllBackgrounds();
+            }, 80);
+        }
+        
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateAllBackgrounds, 30);
+        });
+        updateAllBackgrounds();
+        
+        // ---------- 滚动与交互模块 ----------
         const sections = document.querySelectorAll('.section');
         const container = document.getElementById('scrollContainer');
         const dotNav = document.getElementById('dotNav');
         let currentActive = 0;
         let ticking = false;
-
-        // 建立右侧圆点导航
+        
         function buildDots() {
             dotNav.innerHTML = '';
             sections.forEach((_, idx) => {
@@ -563,16 +623,12 @@
                 if (idx === 0) dot.classList.add('active');
                 dot.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const targetSection = sections[idx];
-                    if (targetSection) {
-                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    sections[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
                 dotNav.appendChild(dot);
             });
         }
-
-        // 基于滚动位置高效更新圆点（使用requestAnimationFrame节流）
+        
         function updateActiveDot() {
             if (ticking) return;
             ticking = true;
@@ -603,8 +659,7 @@
                 ticking = false;
             });
         }
-
-        // 使用 Intersection Observer 触发入场动画（低配设备友好，只增加class，轻量）
+        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -612,15 +667,10 @@
                 }
             });
         }, { threshold: 0.25, rootMargin: "0px 0px -10px 0px" });
-        
         sections.forEach(sec => observer.observe(sec));
-
-        // 监听滚动容器更新指示点 & 主动触发动画预检
-        container.addEventListener('scroll', () => {
-            updateActiveDot();
-        });
         
-        // 初始化位置及首次显示动画
+        container.addEventListener('scroll', updateActiveDot);
+        
         setTimeout(() => {
             sections.forEach(sec => {
                 const rect = sec.getBoundingClientRect();
@@ -631,75 +681,56 @@
             });
             updateActiveDot();
         }, 150);
-
+        
         buildDots();
         
-        // ----- 超大下载按钮（10首歌曲，链接暂留空，用户后续填写）-----
-        const downloadBtn = document.getElementById('downloadSongsBtn');
-        // 预定义10个歌曲占位链接数组（空字符串供用户后续填入）
-        // 为了方便后续维护，用户可在这里填入实际的歌曲下载直链
-        const songLinks = [
-            "",   // 第1首
-            "",   // 第2首
-            "",   // 第3首
-            "",   // 第4首
-            "",   // 第5首
-            "",   // 第6首
-            "",   // 第7首
-            "",   // 第8首
-            "",   // 第9首
-            ""    // 第10首
-        ];
-        
-        // 提供友好的批量下载功能：如果用户未填链接则提示，否则依次触发下载（或打包提示）
-        function downloadSongs() {
-            const validLinks = songLinks.filter(link => link && link.trim() !== "");
-            if (validLinks.length === 0) {
-                showToast('🎵 歌曲下载链接暂未配置，请在代码中 songLinks 数组填入10首歌曲的直链 ~', 2800);
-                return;
+        // ----- 轻提示组件 -----
+        function showToast(msg, duration = 2200) {
+            let toast = document.querySelector('.global-toast');
+            if (!toast) {
+                const div = document.createElement('div');
+                div.className = 'global-toast';
+                div.style.cssText = `position:fixed; bottom:25%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); color:#fff; padding:10px 24px; border-radius:40px; font-size:14px; z-index:10000; max-width:85vw; text-align:center; pointer-events:none; font-weight:500; border:1px solid rgba(255,255,255,0.2); white-space:normal; word-break:break-word;`;
+                document.body.appendChild(div);
+                toast = div;
             }
-            // 如果只有部分链接被填写，提示具体数量，并依次打开（为了用户体验，避免过多弹窗拦截）
-            if (validLinks.length < songLinks.length) {
-                showToast(`🎧 当前已配置 ${validLinks.length} 首歌曲，开始下载...`, 2000);
-            } else {
-                showToast(`🎉 10首精选歌曲开始下载，享受音乐盛宴！`, 1800);
-            }
-            // 依次触发下载（在浏览器中通常是打开链接或触发下载，针对直链）
-            // 为了不阻塞用户，创建一个异步队列，避免同时打开太多
-            let index = 0;
-            function openNext() {
-                if (index >= songLinks.length) return;
-                const link = songLinks[index];
-                if (link && link.trim() !== "") {
-                    // 创建一个隐藏的a标签触发下载/打开
-                    const a = document.createElement('a');
-                    a.href = link;
-                    a.target = '_blank';
-                    a.download = ''; // 如果链接支持下载属性，会尝试直接下载，否则新窗口打开
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    // 添加微小延迟避免被浏览器拦截过多弹窗
-                    setTimeout(() => {
-                        index++;
-                        openNext();
-                    }, 300);
-                } else {
-                    index++;
-                    openNext();
-                }
-            }
-            openNext();
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, duration);
         }
         
+        // ================= 核心：下载一首歌功能 =================
+        // ★ 歌曲下载链接已填入您提供的地址 ★
+        const songDownloadUrl = "https://ghproxy.net/https://raw.githubusercontent.com/TZB679/myhomepage/refs/heads/main/Assets/download.mp3";
+        
+        function downloadSingleSong() {
+            if (!songDownloadUrl) {
+                showToast("🎧 下载链接暂不可用，请稍后再试", 2000);
+                return;
+            }
+            // 创建隐藏链接触发下载
+            const link = document.createElement('a');
+            link.href = songDownloadUrl;
+            link.download = '';  // 尝试触发下载
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("✨ 单曲下载已开始，享受音乐~", 1800);
+        }
+        
+        const downloadBtn = document.getElementById('downloadSingleSongBtn');
         if (downloadBtn) {
             downloadBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                downloadSongs();
+                downloadSingleSong();
             });
         }
         
-        // 其他卡片和标签跳转逻辑
+        // 其他交互
         function initClickHandlers() {
             const clickableElements = document.querySelectorAll('[data-url]');
             clickableElements.forEach(el => {
@@ -724,39 +755,19 @@
                     showToast('🎧 HI-FI工作室即将上线，敬请期待！', 1800);
                 });
             }
-            // 重新绑定core-card事件防止遗漏
             const coreCards = document.querySelectorAll('.core-card');
             coreCards.forEach(card => {
-                if (!card.hasAttribute('data-url')) return;
-                card.style.cursor = 'pointer';
+                if (card.hasAttribute('data-url')) card.style.cursor = 'pointer';
             });
         }
         
-        function showToast(msg, duration = 2200) {
-            let toast = document.querySelector('.global-toast');
-            if (!toast) {
-                const div = document.createElement('div');
-                div.className = 'global-toast';
-                div.style.cssText = `position:fixed; bottom:25%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); color:#fff; padding:10px 24px; border-radius:40px; font-size:14px; z-index:10000; max-width:85vw; text-align:center; pointer-events:none; font-weight:500; border:1px solid rgba(255,255,255,0.2); white-space:normal; word-break:break-word;`;
-                document.body.appendChild(div);
-                toast = div;
-            }
-            toast.innerText = msg;
-            toast.style.opacity = '1';
-            clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => {
-                toast.style.opacity = '0';
-            }, duration);
-        }
-
         initClickHandlers();
         
-        // 添加样式提升兼容性 & 低配设备强制使用will-change优化
         const style = document.createElement('style');
         style.textContent = `
-            .section-bg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: brightness(0.88); z-index: 0; }
-            .section, .section-content, .giant-download-btn { will-change: transform; }
-            .scroll-container { scrollbar-width: thin; }
+            .section-bg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: brightness(0.88); z-index: 1; }
+            .section, .section-content { will-change: transform; }
+            .download-headphone { cursor: pointer; background: radial-gradient(circle at 30% 20%, #2c2f3a, #12141c); border: none; }
         `;
         document.head.appendChild(style);
     })();
